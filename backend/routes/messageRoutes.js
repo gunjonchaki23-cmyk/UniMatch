@@ -1,0 +1,11 @@
+const express = require('express');
+const { getMessages, sendMessage } = require('../controllers/messageController');
+const { protect } = require('../middleware/authMiddleware');
+
+const router = express.Router();
+
+router.route('/:userId')
+  .get(protect, getMessages)
+  .post(protect, sendMessage);
+
+module.exports = router;
