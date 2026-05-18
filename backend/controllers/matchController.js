@@ -1,22 +1,36 @@
-const Match = require('../models/Match');
-const User = require('../models/User');
+const supabase = require('../config/db');
 
 // @desc    Get all matches for current user
 // @route   GET /api/matches
 // @access  Private
 const getMatches = async (req, res) => {
   try {
-    const matches = await Match.find({
-      users: { $in: [req.user._id] }
-    }).populate('users', 'name photos isOnline');
+    const { data: matches, error } = await supabase
+      .from('matches')
+      .select(`
+        id,
+        created_at,
+        user_one:user_one ( id, name, photos, is_online ),
+        user_two:user_two ( id, name, photos, is_online )
+      `)
+      .or(`user_one.eq.${req.user.id},user_two.eq.${req.user.id}`);
+
+    if (error) {
+      return res.status(500).json({ message: error.message });
+    }
 
     // Format response to make it easy for frontend
-    const formattedMatches = matches.map(match => {
-      const otherUser = match.users.find(u => u._id.toString() !== req.user._id.toString());
+    const formattedMatches = (matches || []).map(match => {
+      const otherUser = match.user_one.id !== req.user.id ? match.user_one : match.user_two;
       return {
-        matchId: match._id,
-        user: otherUser,
-        createdAt: match.createdAt
+        matchId: match.id,
+        user: {
+          _id: otherUser.id,
+          name: otherUser.name,
+          photos: otherUser.photos || [],
+          isOnline: otherUser.is_online
+        },
+        createdAt: match.created_at
       };
     });
 

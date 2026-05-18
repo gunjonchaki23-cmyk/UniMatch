@@ -1,4 +1,4 @@
-const User = require('../models/User');
+const supabase = require('../config/db');
 
 // Helper to generate a fun campus fallback icebreaker
 const generateFallbackIcebreaker = (currentUser, targetUser) => {
@@ -26,12 +26,26 @@ const generateIcebreaker = async (req, res) => {
       return res.status(400).json({ message: 'Target user ID is required' });
     }
 
-    const currentUser = await User.findById(req.user._id);
-    const targetUser = await User.findById(targetUserId);
+    const { data: currentUserRow, error: err1 } = await supabase.from('users').select('*').eq('id', req.user.id).single();
+    const { data: targetUserRow, error: err2 } = await supabase.from('users').select('*').eq('id', targetUserId).single();
 
-    if (!targetUser) {
+    if (err2 || !targetUserRow) {
       return res.status(404).json({ message: 'Target user not found' });
     }
+
+    const currentUser = {
+      name: currentUserRow.name,
+      department: currentUserRow.department,
+      campusSpots: currentUserRow.campus_spots || [],
+      interests: currentUserRow.interests || []
+    };
+
+    const targetUser = {
+      name: targetUserRow.name,
+      department: targetUserRow.department,
+      campusSpots: targetUserRow.campus_spots || [],
+      interests: targetUserRow.interests || []
+    };
 
     const apiKey = process.env.GEMINI_API_KEY;
 
@@ -85,8 +99,20 @@ Include extremely funny, specific references to AIUB campus life (e.g., getting 
     console.error('Gemini Icebreaker generation error:', error);
     // Graceful fallback to static templates on any error
     try {
-      const currentUser = await User.findById(req.user._id);
-      const targetUser = await User.findById(req.body.targetUserId);
+      const { data: currentUserRow } = await supabase.from('users').select('*').eq('id', req.user.id).single();
+      const { data: targetUserRow } = await supabase.from('users').select('*').eq('id', req.body.targetUserId).single();
+      const currentUser = {
+        name: currentUserRow.name,
+        department: currentUserRow.department,
+        campusSpots: currentUserRow.campus_spots || [],
+        interests: currentUserRow.interests || []
+      };
+      const targetUser = {
+        name: targetUserRow.name,
+        department: targetUserRow.department,
+        campusSpots: targetUserRow.campus_spots || [],
+        interests: targetUserRow.interests || []
+      };
       const icebreaker = generateFallbackIcebreaker(currentUser, targetUser);
       return res.json({ icebreaker, isAI: false });
     } catch (innerError) {

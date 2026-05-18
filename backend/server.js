@@ -5,7 +5,7 @@ const cors = require('cors');
 const { Server } = require('socket.io');
 const path = require('path');
 const fs = require('fs');
-const connectDB = require('./config/db');
+const supabase = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const swipeRoutes = require('./routes/swipeRoutes');
@@ -16,8 +16,7 @@ const aiRoutes = require('./routes/aiRoutes');
 // Load env vars
 dotenv.config();
 
-// Connect to database
-connectDB();
+// Connect to database (Supabase client loaded dynamically)
 
 const app = express();
 const server = http.createServer(app);

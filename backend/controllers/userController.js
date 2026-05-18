@@ -1,4 +1,4 @@
-const User = require('../models/User');
+const supabase = require('../config/db');
 const cloudinary = require('cloudinary').v2;
 const fs = require('fs');
 const path = require('path');
@@ -39,12 +39,36 @@ const saveFileLocally = async (file) => {
 // @access  Private
 const getUserProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id);
-    if (user) {
-      res.json(user);
-    } else {
-      res.status(404).json({ message: 'User not found' });
+    const { data: user, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('id', req.user.id)
+      .single();
+
+    if (error || !user) {
+      return res.status(404).json({ message: 'User not found' });
     }
+
+    res.json({
+      _id: user.id,
+      name: user.name,
+      email: user.email,
+      age: user.age,
+      gender: user.gender,
+      interestedIn: user.interested_in,
+      studentId: user.student_id,
+      batch: user.batch,
+      department: user.department,
+      campusSpots: user.campus_spots || [],
+      interests: user.interests || [],
+      prompts: user.prompts || [],
+      bio: user.bio || '',
+      photos: user.photos || [],
+      coverPhoto: user.cover_photo || '',
+      freeSlots: user.free_slots || [],
+      musicAnthem: user.music_anthem || { title: '', artist: '' },
+      isOnline: user.is_online
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -55,35 +79,62 @@ const getUserProfile = async (req, res) => {
 // @access  Private
 const updateUserProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id);
-
-    if (user) {
-      user.name = req.body.name || user.name;
-      user.bio = req.body.bio || user.bio;
-      user.age = req.body.age || user.age;
-      user.gender = req.body.gender || user.gender;
-      user.interestedIn = req.body.interestedIn || user.interestedIn;
-      user.coverPhoto = req.body.coverPhoto || user.coverPhoto;
-      
-      // New campus fields
-      if (req.body.studentId !== undefined) user.studentId = req.body.studentId;
-      if (req.body.department !== undefined) user.department = req.body.department;
-      if (req.body.campusSpots !== undefined) user.campusSpots = req.body.campusSpots;
-      if (req.body.interests !== undefined) user.interests = req.body.interests;
-      if (req.body.prompts !== undefined) user.prompts = req.body.prompts;
-      if (req.body.freeSlots !== undefined) user.freeSlots = req.body.freeSlots;
-      if (req.body.musicAnthem !== undefined) user.musicAnthem = req.body.musicAnthem;
-      
-      if (req.body.photos) {
-        user.photos = req.body.photos;
+    // Generate AIUB Student Batch dynamically
+    let batch = req.body.batch;
+    if (req.body.studentId) {
+      const parts = req.body.studentId.split('-');
+      if (parts[0] && parts[0].length === 2) {
+        batch = `20${parts[0]} Batch`;
       }
-
-      const updatedUser = await user.save();
-
-      res.json(updatedUser);
-    } else {
-      res.status(404).json({ message: 'User not found' });
     }
+
+    const { data: user, error: updateError } = await supabase
+      .from('users')
+      .update({
+        name: req.body.name,
+        bio: req.body.bio,
+        age: req.body.age,
+        gender: req.body.gender,
+        interested_in: req.body.interestedIn,
+        cover_photo: req.body.coverPhoto,
+        student_id: req.body.studentId,
+        department: req.body.department,
+        campus_spots: req.body.campusSpots,
+        interests: req.body.interests,
+        prompts: req.body.prompts,
+        free_slots: req.body.freeSlots,
+        music_anthem: req.body.musicAnthem,
+        photos: req.body.photos,
+        batch: batch
+      })
+      .eq('id', req.user.id)
+      .select()
+      .single();
+
+    if (updateError || !user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.json({
+      _id: user.id,
+      name: user.name,
+      email: user.email,
+      age: user.age,
+      gender: user.gender,
+      interestedIn: user.interested_in,
+      studentId: user.student_id,
+      batch: user.batch,
+      department: user.department,
+      campusSpots: user.campus_spots || [],
+      interests: user.interests || [],
+      prompts: user.prompts || [],
+      bio: user.bio || '',
+      photos: user.photos || [],
+      coverPhoto: user.cover_photo || '',
+      freeSlots: user.free_slots || [],
+      musicAnthem: user.music_anthem || { title: '', artist: '' },
+      isOnline: user.is_online
+    });
   } catch (error) {
     console.error('Update profile error:', error);
     res.status(500).json({ message: error.message });
@@ -95,62 +146,95 @@ const updateUserProfile = async (req, res) => {
 // @access  Private
 const getRecommendations = async (req, res) => {
   try {
-    const currentUser = await User.findById(req.user._id);
-    
-    // Don't show users already liked/disliked, or self
-    const excludedIds = [currentUser._id, ...currentUser.likes, ...currentUser.dislikes];
-    
-    const query = {
-      _id: { $nin: excludedIds }
-    };
+    // Exclude self, already liked/disliked
+    const { data: likedRows } = await supabase.from('likes').select('liked_id').eq('liker_id', req.user.id);
+    const { data: dislikedRows } = await supabase.from('dislikes').select('disliked_id').eq('disliker_id', req.user.id);
+
+    const excludedIds = [
+      req.user.id,
+      ...(likedRows || []).map(r => r.liked_id),
+      ...(dislikedRows || []).map(r => r.disliked_id)
+    ];
+
+    let query = supabase.from('users').select('*').not('id', 'in', `(${excludedIds.join(',')})`);
     
     // Simple gender filtering based on preference
-    if (currentUser.interestedIn && currentUser.interestedIn !== 'Both') {
-      query.gender = currentUser.interestedIn;
+    if (req.user.interestedIn && req.user.interestedIn !== 'Both') {
+      query = query.eq('gender', req.user.interestedIn);
     }
 
     // Filter by department if passed in query string (e.g. ?dept=CSE)
     if (req.query.dept) {
-      query.department = req.query.dept;
+      query = query.eq('department', req.query.dept);
     }
 
-    let users = await User.find(query);
+    let { data: users, error } = await query;
+
+    if (error) {
+      return res.status(500).json({ message: error.message });
+    }
+
+    // Fetch comments (admires) sent to the current user
+    const { data: userAdmires } = await supabase
+      .from('admires')
+      .select('*')
+      .eq('receiver_id', req.user.id);
 
     // Dynamic ranking based on shared campus spots and interests
     users = users.map(user => {
       let score = 0;
       
+      const userObj = {
+        _id: user.id,
+        name: user.name,
+        email: user.email,
+        age: user.age,
+        gender: user.gender,
+        interestedIn: user.interested_in,
+        studentId: user.student_id,
+        batch: user.batch,
+        department: user.department,
+        campusSpots: user.campus_spots || [],
+        interests: user.interests || [],
+        prompts: user.prompts || [],
+        bio: user.bio || '',
+        photos: user.photos || [],
+        coverPhoto: user.cover_photo || '',
+        freeSlots: user.free_slots || [],
+        musicAnthem: user.music_anthem || { title: '', artist: '' },
+        isOnline: user.is_online
+      };
+
       // Calculate shared campus spots score
-      const sharedSpots = (user.campusSpots || []).filter(spot => 
-        (currentUser.campusSpots || []).includes(spot)
+      const sharedSpots = (userObj.campusSpots).filter(spot => 
+        (req.user.campusSpots || []).includes(spot)
       );
       score += sharedSpots.length * 10; // 10 points per mutual spot
 
       // Calculate shared interests score
-      const sharedInterests = (user.interests || []).filter(interest => 
-        (currentUser.interests || []).includes(interest)
+      const sharedInterests = (userObj.interests).filter(interest => 
+        (req.user.interests || []).includes(interest)
       );
       score += sharedInterests.length * 5; // 5 points per mutual interest
 
       // Calculate shared free slots score
-      const sharedSlots = (user.freeSlots || []).filter(slot => 
-        (currentUser.freeSlots || []).includes(slot)
+      const sharedSlots = (userObj.freeSlots).filter(slot => 
+        (req.user.freeSlots || []).includes(slot)
       );
       score += sharedSlots.length * 15; // 15 points per mutual slot
 
-      const userObj = user.toObject();
       userObj.matchScore = score;
       userObj.sharedSpots = sharedSpots;
       userObj.sharedInterests = sharedInterests;
       userObj.sharedSlots = sharedSlots;
 
       // Check if recommended user sent a direct admire (comment) to the current user
-      const mutualAdmire = currentUser.admires.find(admire => 
-        admire.sender.toString() === user._id.toString()
+      const mutualAdmire = (userAdmires || []).find(admire => 
+        admire.sender_id === user.id
       );
       if (mutualAdmire) {
         userObj.admireComment = mutualAdmire.comment;
-        userObj.admirePrompt = mutualAdmire.promptQuestion;
+        userObj.admirePrompt = mutualAdmire.prompt_question;
       }
       
       return userObj;
@@ -183,14 +267,47 @@ const uploadProfilePicture = async (req, res) => {
       photoUrl = await saveFileLocally(req.file);
     }
 
-    const user = await User.findById(req.user._id);
-    if (user) {
-      user.photos = [photoUrl, ...user.photos.slice(1)];
-      await user.save();
-      res.json({ message: 'Profile picture uploaded successfully', photoUrl, user });
-    } else {
-      res.status(404).json({ message: 'User not found' });
+    const { data: user, error: getError } = await supabase.from('users').select('*').eq('id', req.user.id).single();
+    if (getError || !user) {
+      return res.status(404).json({ message: 'User not found' });
     }
+
+    const oldPhotos = user.photos || [];
+    const newPhotos = [photoUrl, ...oldPhotos.slice(1)];
+
+    const { data: updatedUser, error: updateError } = await supabase
+      .from('users')
+      .update({ photos: newPhotos })
+      .eq('id', req.user.id)
+      .select()
+      .single();
+
+    if (updateError) {
+      return res.status(500).json({ message: updateError.message });
+    }
+
+    const formattedUser = {
+      _id: updatedUser.id,
+      name: updatedUser.name,
+      email: updatedUser.email,
+      age: updatedUser.age,
+      gender: updatedUser.gender,
+      interestedIn: updatedUser.interested_in,
+      studentId: updatedUser.student_id,
+      batch: updatedUser.batch,
+      department: updatedUser.department,
+      campusSpots: updatedUser.campus_spots || [],
+      interests: updatedUser.interests || [],
+      prompts: updatedUser.prompts || [],
+      bio: updatedUser.bio || '',
+      photos: updatedUser.photos || [],
+      coverPhoto: updatedUser.cover_photo || '',
+      freeSlots: updatedUser.free_slots || [],
+      musicAnthem: updatedUser.music_anthem || { title: '', artist: '' },
+      isOnline: updatedUser.is_online
+    };
+
+    res.json({ message: 'Profile picture uploaded successfully', photoUrl, user: formattedUser });
   } catch (error) {
     console.error('Profile photo upload error:', error);
     res.status(500).json({ message: error.message });
@@ -215,14 +332,39 @@ const uploadCoverPhoto = async (req, res) => {
       coverUrl = await saveFileLocally(req.file);
     }
 
-    const user = await User.findById(req.user._id);
-    if (user) {
-      user.coverPhoto = coverUrl;
-      await user.save();
-      res.json({ message: 'Cover photo uploaded successfully', coverUrl, user });
-    } else {
-      res.status(404).json({ message: 'User not found' });
+    const { data: updatedUser, error: updateError } = await supabase
+      .from('users')
+      .update({ cover_photo: coverUrl })
+      .eq('id', req.user.id)
+      .select()
+      .single();
+
+    if (updateError || !updatedUser) {
+      return res.status(404).json({ message: 'User not found' });
     }
+
+    const formattedUser = {
+      _id: updatedUser.id,
+      name: updatedUser.name,
+      email: updatedUser.email,
+      age: updatedUser.age,
+      gender: updatedUser.gender,
+      interestedIn: updatedUser.interested_in,
+      studentId: updatedUser.student_id,
+      batch: updatedUser.batch,
+      department: updatedUser.department,
+      campusSpots: updatedUser.campus_spots || [],
+      interests: updatedUser.interests || [],
+      prompts: updatedUser.prompts || [],
+      bio: updatedUser.bio || '',
+      photos: updatedUser.photos || [],
+      coverPhoto: updatedUser.cover_photo || '',
+      freeSlots: updatedUser.free_slots || [],
+      musicAnthem: updatedUser.music_anthem || { title: '', artist: '' },
+      isOnline: updatedUser.is_online
+    };
+
+    res.json({ message: 'Cover photo uploaded successfully', coverUrl, user: formattedUser });
   } catch (error) {
     console.error('Cover photo upload error:', error);
     res.status(500).json({ message: error.message });
