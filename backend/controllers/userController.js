@@ -256,10 +256,9 @@ const uploadProfilePicture = async (req, res) => {
     if (!req.file) {
       return res.status(400).json({ message: 'Please upload a photo' });
     }
-
     let photoUrl;
     const hasCloudinary = process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET;
-
+    console.log('hasCloudinary:', !!hasCloudinary);
     if (hasCloudinary) {
       photoUrl = await uploadToCloudinary(req.file.buffer);
     } else {

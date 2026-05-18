@@ -14,7 +14,11 @@ const messageRoutes = require('./routes/messageRoutes');
 const aiRoutes = require('./routes/aiRoutes');
 
 // Load env vars
-dotenv.config();
+dotenv.config({ override: true });
+console.log("STARTUP: CLOUDINARY_CLOUD_NAME =", JSON.stringify(process.env.CLOUDINARY_CLOUD_NAME));
+console.log("STARTUP: CLOUDINARY_API_KEY =", JSON.stringify(process.env.CLOUDINARY_API_KEY));
+console.log("STARTUP: CLOUDINARY_API_SECRET =", JSON.stringify(process.env.CLOUDINARY_API_SECRET));
+console.log("STARTUP: CLOUDINARY_URL =", JSON.stringify(process.env.CLOUDINARY_URL));
 
 // Connect to database (Supabase client loaded dynamically)
 

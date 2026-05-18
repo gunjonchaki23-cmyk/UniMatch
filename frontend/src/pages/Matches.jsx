@@ -29,39 +29,43 @@ const Matches = () => {
   }, [navigate]);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex flex-col transition">
-      {/* Header */}
-      <div className="h-16 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 flex items-center px-4 sticky top-0 z-10 transition">
-        <button onClick={() => navigate('/dashboard')} className="p-2 text-primary">
-          <ArrowLeft size={24} />
+    <div className="min-h-screen bg-transparent flex flex-col transition">
+      {/* Floating Header Panel */}
+      <div className="h-16 liquid-glass mx-4 my-2 px-4 flex items-center sticky top-0 z-10 transition rounded-2xl border-white/40 dark:border-white/10">
+        <button onClick={() => navigate('/dashboard')} className="p-2 text-primary hover:scale-115 transition">
+          <ArrowLeft size={22} />
         </button>
-        <h1 className="text-xl font-bold ml-4 text-gray-800 dark:text-gray-200">Your Matches</h1>
+        <h1 className="text-lg font-black ml-2 text-gray-800 dark:text-gray-100 tracking-tight">Your Sparks</h1>
       </div>
 
       {/* Match List */}
       <div className="p-4 flex-1">
         {matches.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-gray-500 mt-20">
-            <div className="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center mb-4">
-              <span className="text-4xl">😢</span>
+            <div className="w-20 h-20 liquid-glass rounded-full flex items-center justify-center mb-4 border border-white/30 dark:border-white/10">
+              <span className="text-3xl">😢</span>
             </div>
-            <p>No matches yet. Keep swiping!</p>
+            <p className="text-xs font-bold text-gray-400">No sparks ignited yet. Keep swiping!</p>
           </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {matches.map((match) => (
-              <Link to={`/chat/${match.user._id}`} key={match.matchId} className="bg-white rounded-2xl shadow overflow-hidden flex flex-col items-center p-4 hover:shadow-lg transition">
-                <div className="w-20 h-20 bg-gradient-primary rounded-full mb-3 flex items-center justify-center text-white text-2xl font-bold relative">
+              <Link 
+                to={`/chat/${match.user._id}`} 
+                key={match.matchId} 
+                className="liquid-glass rounded-3xl overflow-hidden flex flex-col items-center p-5 hover:scale-103 active:scale-98 border-white/30 dark:border-white/5 hover:border-primary/30 transition duration-300"
+              >
+                <div className="w-20 h-20 bg-gradient-primary rounded-2xl mb-3.5 flex items-center justify-center text-white text-2xl font-black relative shadow-lg shadow-red-500/20 border-2 border-white/40">
                   {match.user.photos && match.user.photos.length > 0 ? (
-                    <img src={match.user.photos[0]} alt={match.user.name} className="w-full h-full rounded-full object-cover" />
+                    <img src={match.user.photos[0]} alt={match.user.name} className="w-full h-full rounded-2xl object-cover" />
                   ) : (
                     match.user.name.charAt(0)
                   )}
                   {match.user.isOnline && (
-                    <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-500 border-2 border-white rounded-full"></div>
+                    <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white dark:border-gray-900 rounded-full shadow-md"></div>
                   )}
                 </div>
-                <h3 className="font-bold text-gray-800 text-center">{match.user.name}</h3>
+                <h3 className="font-extrabold text-sm text-gray-850 dark:text-gray-100 text-center">{match.user.name}</h3>
               </Link>
             ))}
           </div>

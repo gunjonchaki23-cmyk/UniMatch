@@ -88,37 +88,45 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50 overflow-hidden">
+    <div className="flex flex-col h-screen bg-transparent overflow-hidden">
       {/* Top Navbar */}
-      <div className="h-16 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between px-6 z-10 flex-shrink-0 transition">
-        <h1 className="text-2xl font-extrabold text-primary tracking-tighter">UniMatch.</h1>
+      <div className="h-16 liquid-glass mx-4 my-2 px-6 flex items-center justify-between z-10 flex-shrink-0 transition rounded-2xl">
+        <h1 className="text-2xl font-black text-gradient-primary tracking-tighter flex items-center gap-1.5">
+          <span>UniMatch</span> <span className="text-xl">🔥</span>
+        </h1>
         <div className="flex items-center space-x-4">
           <button 
             onClick={toggleDarkMode} 
-            className="text-gray-400 dark:text-gray-300 hover:text-primary transition text-lg"
+            className="w-9 h-9 rounded-xl flex items-center justify-center bg-white/10 dark:bg-black/10 border border-white/20 text-gray-500 dark:text-gray-300 hover:scale-105 hover:text-primary transition"
             title="Toggle Dark/Light Mode"
           >
             {darkMode ? '☀️' : '🌙'}
           </button>
-          <button onClick={() => navigate('/matches')} className="text-gray-400 dark:text-gray-300 hover:text-primary transition relative">
-            <MessageCircle size={28} />
+          <button 
+            onClick={() => navigate('/matches')} 
+            className="w-9 h-9 rounded-xl flex items-center justify-center bg-white/10 dark:bg-black/10 border border-white/20 text-gray-500 dark:text-gray-300 hover:scale-105 hover:text-primary transition relative"
+          >
+            <MessageCircle size={20} />
           </button>
-          <div className="w-10 h-10 rounded-full bg-gradient-primary flex items-center justify-center text-white font-bold cursor-pointer" onClick={() => navigate('/profile')}>
-            {userInfo?.name?.charAt(0) || <UserIcon />}
+          <div 
+            className="w-9 h-9 rounded-xl bg-gradient-primary flex items-center justify-center text-white font-bold cursor-pointer hover:scale-105 transition" 
+            onClick={() => navigate('/profile')}
+          >
+            {userInfo?.name?.charAt(0) || <UserIcon size={18} />}
           </div>
         </div>
       </div>
 
       {/* Department Filter Bar */}
-      <div className="bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 py-3 px-6 flex gap-2 overflow-x-auto scrollbar-none z-10 flex-shrink-0 transition">
+      <div className="liquid-glass mx-4 mb-2 py-3 px-4 flex gap-2 overflow-x-auto scrollbar-none z-10 flex-shrink-0 transition rounded-2xl">
         {['All', 'CSE', 'EEE', 'BBA', 'Architecture', 'English', 'LLB'].map((dept) => (
           <button
             key={dept}
             onClick={() => setActiveDept(dept)}
-            className={`px-4 py-1.5 rounded-full text-xs font-extrabold transition whitespace-nowrap ${
+            className={`px-4 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap border ${
               activeDept === dept
-                ? 'bg-gradient-primary text-white shadow-sm'
-                : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+                ? 'bg-gradient-primary text-white border-transparent shadow-sm'
+                : 'bg-white/35 dark:bg-black/20 border-white/25 dark:border-white/5 text-gray-600 dark:text-gray-300 hover:bg-white/50 dark:hover:bg-black/30'
             }`}
           >
             {dept}
@@ -127,7 +135,7 @@ const Dashboard = () => {
       </div>
 
       {/* Swipe Area */}
-      <div className="flex-1 relative flex items-center justify-center p-4 bg-gray-50 dark:bg-gray-950 transition">
+      <div className="flex-1 relative flex items-center justify-center p-4 bg-transparent transition">
         <div className="relative w-full max-w-sm h-[500px]">
           {users.length > 0 && currentIndex < users.length ? (
             users.slice(currentIndex, currentIndex + 3).reverse().map((user, idx) => (
@@ -138,40 +146,40 @@ const Dashboard = () => {
               />
             ))
           ) : (
-            <div className="w-full h-full rounded-3xl bg-white dark:bg-gray-900 shadow-lg flex flex-col items-center justify-center p-8 text-center border-4 border-dashed border-gray-200 dark:border-gray-800 transition">
-              <div className="w-20 h-20 bg-gray-100 dark:bg-gray-850 rounded-full flex items-center justify-center mb-4">
-                <Heart className="w-10 h-10 text-gray-400" />
+            <div className="w-full h-full liquid-glass flex flex-col items-center justify-center p-8 text-center transition">
+              <div className="w-20 h-20 bg-white/20 dark:bg-black/25 rounded-full flex items-center justify-center mb-4 border border-white/20">
+                <Heart className="w-10 h-10 text-primary" />
               </div>
-              <h3 className="text-xl font-bold text-gray-700 dark:text-gray-200 mb-2">No more matches</h3>
-              <p className="text-gray-500 dark:text-gray-400 text-xs">You've seen everyone in your area. Check back later!</p>
+              <h3 className="text-xl font-extrabold text-gray-800 dark:text-gray-100 mb-2">No more sparks</h3>
+              <p className="text-gray-500 dark:text-gray-400 text-xs max-w-[200px]">You've seen everyone in your area. Keep swiping or check back later!</p>
             </div>
           )}
         </div>
       </div>
 
       {/* Bottom Action Bar */}
-      <div className="h-24 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-t border-gray-100 dark:border-gray-800 flex items-center justify-center space-x-8 z-10 pb-4 transition">
+      <div className="h-24 bg-transparent flex items-center justify-center space-x-6 z-10 pb-4 transition">
         <button 
-          className="w-16 h-16 rounded-full bg-white dark:bg-gray-800 shadow-lg flex items-center justify-center text-red-500 hover:scale-110 transition transform border border-gray-100 dark:border-gray-700"
+          className="w-16 h-16 rounded-full liquid-glass flex items-center justify-center text-red-500 hover:scale-110 active:scale-95 hover:shadow-red-500/10 transition border border-white/40 dark:border-white/10"
           onClick={() => {
             if(currentIndex < users.length) handleSwipe('left', users[currentIndex]._id);
           }}
         >
-          <X size={32} strokeWidth={3} />
+          <X size={28} strokeWidth={3} />
         </button>
         <button 
-          className="w-16 h-16 rounded-full bg-white dark:bg-gray-800 shadow-lg flex items-center justify-center text-green-500 hover:scale-110 transition transform border border-gray-100 dark:border-gray-700"
+          className="w-16 h-16 rounded-full liquid-glass flex items-center justify-center text-green-500 hover:scale-110 active:scale-95 hover:shadow-green-500/10 transition border border-white/40 dark:border-white/10"
           onClick={() => {
             if(currentIndex < users.length) handleSwipe('right', users[currentIndex]._id);
           }}
         >
-          <Heart size={32} strokeWidth={3} />
+          <Heart size={28} strokeWidth={3} />
         </button>
       </div>
 
       {/* Match Confetti Screen Modal */}
       {showMatchModal && matchedUser && (
-        <div className="absolute inset-0 bg-black/90 backdrop-blur-md flex flex-col items-center justify-center z-50 overflow-hidden animate-fade-in select-none">
+        <div className="absolute inset-0 bg-[#070b13]/90 backdrop-blur-xl flex flex-col items-center justify-center z-50 overflow-hidden animate-fade-in select-none">
           {/* Confetti falling container */}
           <div className="absolute inset-0 pointer-events-none overflow-hidden">
             {Array.from({ length: 40 }).map((_, i) => {
@@ -207,7 +215,7 @@ const Dashboard = () => {
           </div>
 
           <div className="flex items-center justify-center space-x-[-15px] my-10 z-10 relative">
-            <div className="w-24 h-24 rounded-full border-4 border-white shadow-2xl overflow-hidden bg-gray-200 transform -rotate-6 hover:scale-105 transition">
+            <div className="w-24 h-24 rounded-full border-4 border-white/50 shadow-2xl overflow-hidden bg-gray-200 transform -rotate-6 hover:scale-105 transition">
               {userInfo?.photos?.[0] || userInfo?.photoUrl ? (
                 <img src={userInfo.photos?.[0] || userInfo.photoUrl} alt="Me" className="w-full h-full object-cover" />
               ) : (
@@ -217,7 +225,7 @@ const Dashboard = () => {
               )}
             </div>
             
-            <div className="w-24 h-24 rounded-full border-4 border-white shadow-2xl overflow-hidden bg-gray-200 transform rotate-6 hover:scale-105 transition">
+            <div className="w-24 h-24 rounded-full border-4 border-white/50 shadow-2xl overflow-hidden bg-gray-200 transform rotate-6 hover:scale-105 transition">
               {matchedUser.photos?.[0] ? (
                 <img src={matchedUser.photos[0]} alt={matchedUser.name} className="w-full h-full object-cover" />
               ) : (
@@ -228,19 +236,19 @@ const Dashboard = () => {
             </div>
           </div>
 
-          <div className="flex flex-col space-y-2 w-56 z-10">
+          <div className="flex flex-col space-y-2.5 w-56 z-10">
             <button
               onClick={() => {
                 setShowMatchModal(false);
                 navigate(`/chat/${matchedUser._id}`);
               }}
-              className="w-full py-3 bg-gradient-primary text-white font-extrabold rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition transform active:scale-95 text-center text-xs"
+              className="w-full py-3.5 liquid-glass-button text-white font-extrabold rounded-2xl shadow-lg text-center text-xs"
             >
               Send a Message ⚡
             </button>
             <button
               onClick={() => setShowMatchModal(false)}
-              className="w-full py-3 bg-white/10 hover:bg-white/20 text-white font-extrabold rounded-full border border-white/20 transition text-center text-xs"
+              className="w-full py-3.5 bg-white/10 hover:bg-white/20 text-white font-extrabold rounded-2xl border border-white/20 transition text-center text-xs"
             >
               Keep Swiping 🔍
             </button>

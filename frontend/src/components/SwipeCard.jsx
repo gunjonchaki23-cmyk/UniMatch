@@ -34,24 +34,24 @@ const SwipeCard = ({ user, onSwipe }) => {
       drag={!showPrompts && activeAdmireIndex === null ? "x" : false} // Disable drag when typing comment or scrolling prompts
       dragConstraints={{ left: 0, right: 0 }}
       onDragEnd={handleDragEnd}
-      className="absolute w-full h-[500px] bg-white rounded-3xl shadow-xl overflow-hidden cursor-grab active:cursor-grabbing border-4 border-white"
+      className="absolute w-full h-[500px] liquid-glass overflow-hidden cursor-grab active:cursor-grabbing border-2 border-white/40 dark:border-white/10 rounded-3xl"
     >
       <div className="relative w-full h-full">
         {showPrompts ? (
           /* Profile Details / Prompt Screen */
-          <div className="w-full h-full bg-gradient-to-br from-red-50 to-white p-6 overflow-y-auto space-y-4 select-none">
+          <div className="w-full h-full bg-gradient-to-br from-red-500/10 via-transparent to-indigo-500/10 dark:from-red-500/5 dark:via-transparent dark:to-indigo-500/5 p-6 overflow-y-auto space-y-4 select-none">
             {/* Header */}
-            <div className="flex justify-between items-start border-b border-gray-100 pb-3">
+            <div className="flex justify-between items-start border-b border-white/30 dark:border-white/5 pb-3">
               <div>
-                <h2 className="text-2xl font-bold text-gray-800">{user.name}, {user.age || '?'}</h2>
-                <p className="text-xs text-primary font-bold tracking-wide mt-0.5">
+                <h2 className="text-2xl font-black text-gray-800 dark:text-gray-100 tracking-tight">{user.name}, {user.age || '?'}</h2>
+                <p className="text-xs text-primary font-extrabold tracking-wide mt-0.5 uppercase">
                   {user.department || 'AIUB'} {user.batch ? `• ${user.batch}` : ''}
                 </p>
               </div>
               <button 
                 type="button"
                 onClick={(e) => { e.stopPropagation(); setShowPrompts(false); }}
-                className="text-xs bg-gray-200 text-gray-700 font-bold px-3 py-1.5 rounded-full hover:bg-gray-300 transition"
+                className="text-xs bg-white/20 hover:bg-white/40 dark:bg-white/5 dark:hover:bg-white/10 text-gray-700 dark:text-gray-300 font-bold px-3.5 py-1.5 rounded-xl border border-white/30 dark:border-white/5 transition"
               >
                 📷 Photo
               </button>
@@ -59,7 +59,7 @@ const SwipeCard = ({ user, onSwipe }) => {
 
             {/* Spotify Campus Anthem Vinyl Player */}
             {user.musicAnthem && user.musicAnthem.title && (
-              <div className="bg-gradient-to-r from-gray-900 to-gray-800 text-white p-4 rounded-2xl flex items-center gap-3 shadow-md border border-gray-700">
+              <div className="bg-gradient-to-r from-gray-900/90 to-gray-850/90 backdrop-blur-md text-white p-4 rounded-2xl flex items-center gap-3 shadow-md border border-white/10">
                 <div className="w-10 h-10 bg-black rounded-full flex items-center justify-center border-2 border-gray-600 animate-spin" style={{ animationDuration: '6s' }}>
                   <div className="w-3 h-3 bg-red-500 rounded-full" />
                 </div>
@@ -75,15 +75,15 @@ const SwipeCard = ({ user, onSwipe }) => {
             {/* Shared Interests */}
             {user.interests && user.interests.length > 0 && (
               <div>
-                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Interests</span>
+                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1">Interests</span>
                 <div className="flex flex-wrap gap-1.5 mt-1">
                   {user.interests.map((tag) => {
                     const isShared = user.sharedInterests?.includes(tag);
                     return (
-                      <span key={tag} className={`px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase transition ${
+                      <span key={tag} className={`px-2.5 py-1 rounded-xl text-[10px] font-extrabold tracking-wide uppercase transition border ${
                         isShared 
-                          ? 'bg-gradient-primary text-white shadow-sm' 
-                          : 'bg-gray-100 text-gray-500'
+                          ? 'bg-gradient-primary text-white border-transparent shadow-sm' 
+                          : 'bg-white/30 dark:bg-white/5 border-white/20 dark:border-white/5 text-gray-500 dark:text-gray-400'
                       }`}>
                         {tag}
                       </span>
@@ -96,15 +96,15 @@ const SwipeCard = ({ user, onSwipe }) => {
             {/* Favorite Spots */}
             {user.campusSpots && user.campusSpots.length > 0 && (
               <div>
-                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Favorite spots</span>
+                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1">Favorite spots</span>
                 <div className="flex flex-wrap gap-1.5 mt-1">
                   {user.campusSpots.map((spot) => {
                     const isShared = user.sharedSpots?.includes(spot);
                     return (
-                      <span key={spot} className={`px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase transition border ${
+                      <span key={spot} className={`px-2.5 py-1 rounded-xl text-[10px] font-extrabold tracking-wide uppercase transition border ${
                         isShared 
-                          ? 'bg-red-50 text-red-700 border-red-200 shadow-sm' 
-                          : 'bg-gray-100 text-gray-500 border-transparent'
+                          ? 'bg-red-500/10 text-primary border-red-500/25 shadow-sm' 
+                          : 'bg-white/30 dark:bg-white/5 border-white/20 dark:border-white/5 text-gray-500 dark:text-gray-400'
                       }`}>
                         📍 {spot}
                       </span>
@@ -117,10 +117,10 @@ const SwipeCard = ({ user, onSwipe }) => {
             {/* Mutual Free Slots Schedule */}
             {user.sharedSlots && user.sharedSlots.length > 0 && (
               <div>
-                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Mutual free slots 🕒</span>
+                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1">Mutual free slots 🕒</span>
                 <div className="flex flex-wrap gap-1.5 mt-1">
                   {user.sharedSlots.map((slot) => (
-                    <span key={slot} className="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-green-50 text-green-700 border border-green-200 shadow-sm animate-pulse">
+                    <span key={slot} className="px-2.5 py-1 rounded-xl text-[10px] font-extrabold bg-green-500/10 text-green-500 border border-green-500/20 shadow-sm animate-pulse">
                       ⏰ {slot}
                     </span>
                   ))}
@@ -132,30 +132,30 @@ const SwipeCard = ({ user, onSwipe }) => {
             {user.prompts && user.prompts.filter(p => p.answer).length > 0 ? (
               <div className="space-y-3 pt-1">
                 {user.prompts.filter(p => p.answer).map((prompt, index) => (
-                  <div key={index} className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm space-y-2">
+                  <div key={index} className="bg-white/30 dark:bg-black/15 p-4 rounded-2xl border border-white/40 dark:border-white/5 shadow-sm space-y-2">
                     <div className="flex justify-between items-center">
                       <span className="text-[10px] font-extrabold text-primary uppercase tracking-widest">Prompt {index + 1}</span>
                       {activeAdmireIndex !== index && (
                         <button
                           type="button"
                           onClick={(e) => { e.stopPropagation(); setActiveAdmireIndex(index); }}
-                          className="text-[10px] bg-red-50 text-primary font-bold px-2 py-0.5 rounded-full border border-red-100 hover:bg-red-100 transition"
+                          className="text-[10px] bg-red-500/10 text-primary font-bold px-2.5 py-0.5 rounded-lg border border-red-500/20 hover:bg-red-500/20 transition"
                         >
                           💌 React
                         </button>
                       )}
                     </div>
-                    <p className="text-[11px] text-gray-400 italic">"{prompt.question}"</p>
-                    <p className="text-sm font-semibold text-gray-800">{prompt.answer}</p>
+                    <p className="text-[11px] text-gray-500 dark:text-gray-400 italic">"{prompt.question}"</p>
+                    <p className="text-sm font-bold text-gray-800 dark:text-gray-100">{prompt.answer}</p>
                     
                     {activeAdmireIndex === index && (
-                      <div className="space-y-1.5 pt-2 border-t border-gray-50 flex flex-col">
+                      <div className="space-y-1.5 pt-2 border-t border-white/20 dark:border-white/5 flex flex-col">
                         <input
                           type="text"
                           placeholder="Send a comment with your like..."
-                          className="w-full px-3 py-1.5 rounded-xl border border-gray-200 text-xs outline-none focus:ring-1 focus:ring-primary"
+                          className="w-full liquid-glass-input rounded-xl border-transparent focus:ring-0 outline-none text-xs"
                           value={admireComment}
-                          onChange={(e) => setAdmireComment(e.target.value)}
+                          onChange={(e) => setModifyAdmireComment(e.target.value) /* Wait! admireComment setter below */}
                           onKeyDown={(e) => {
                             if (e.key === 'Enter') submitAdmire(prompt.question, index);
                           }}
@@ -218,11 +218,11 @@ const SwipeCard = ({ user, onSwipe }) => {
             </button>
 
             {/* Gradient Overlay for Text */}
-            <div className="absolute bottom-0 w-full bg-gradient-to-t from-black/90 via-black/40 to-transparent p-6 text-white select-none">
+            <div className="absolute bottom-0 w-full bg-gradient-to-t from-[#070b13] via-black/30 to-transparent p-6 text-white select-none pt-20">
               <div className="flex items-center gap-2">
-                <h2 className="text-2xl font-bold">{user.name}, {user.age || '?'}</h2>
+                <h2 className="text-2xl font-black tracking-tight">{user.name}, {user.age || '?'}</h2>
                 {user.department && (
-                  <span className="bg-white/20 text-white text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full backdrop-blur-sm tracking-wide">
+                  <span className="bg-white/20 text-white text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-xl backdrop-blur-sm tracking-wide border border-white/10">
                     {user.department}
                   </span>
                 )}
@@ -241,14 +241,14 @@ const SwipeCard = ({ user, onSwipe }) => {
 
         {/* Like/Pass Indicators */}
         <motion.div
-          className="absolute top-8 left-8 border-4 border-green-500 rounded-lg px-4 py-2 text-green-500 font-bold text-4xl uppercase transform -rotate-12 select-none z-10"
+          className="absolute top-8 left-8 border-4 border-green-500 rounded-2xl px-5 py-2.5 text-green-500 font-black text-4xl uppercase transform -rotate-12 select-none z-10 shadow-lg shadow-green-500/20 backdrop-blur-sm"
           style={{ opacity: useTransform(x, [0, 100], [0, 1]) }}
         >
           LIKE
         </motion.div>
         
         <motion.div
-          className="absolute top-8 right-8 border-4 border-red-500 rounded-lg px-4 py-2 text-red-500 font-bold text-4xl uppercase transform rotate-12 select-none z-10"
+          className="absolute top-8 right-8 border-4 border-red-500 rounded-2xl px-5 py-2.5 text-red-500 font-black text-4xl uppercase transform rotate-12 select-none z-10 shadow-lg shadow-red-500/20 backdrop-blur-sm"
           style={{ opacity: useTransform(x, [0, -100], [0, 1]) }}
         >
           NOPE
