@@ -87,24 +87,23 @@ const updateUserProfile = async (req, res) => {
         batch = `20${parts[0]} Batch`;
       }
     }
-
     const { data: user, error: updateError } = await supabase
       .from('users')
       .update({
-        name: req.body.name,
-        bio: req.body.bio,
-        age: req.body.age,
-        gender: req.body.gender,
-        interested_in: req.body.interestedIn,
-        cover_photo: req.body.coverPhoto,
-        student_id: req.body.studentId,
-        department: req.body.department,
-        campus_spots: req.body.campusSpots,
-        interests: req.body.interests,
-        prompts: req.body.prompts,
-        free_slots: req.body.freeSlots,
-        music_anthem: req.body.musicAnthem,
-        photos: req.body.photos,
+        name: req.body.name || null,
+        bio: req.body.bio || '',
+        age: req.body.age ? parseInt(req.body.age) : null,
+        gender: req.body.gender || null,
+        interested_in: req.body.interestedIn || null,
+        cover_photo: req.body.coverPhoto || '',
+        student_id: req.body.studentId || null,
+        department: req.body.department || null,
+        campus_spots: req.body.campusSpots || [],
+        interests: req.body.interests || [],
+        prompts: req.body.prompts || [],
+        free_slots: req.body.freeSlots || [],
+        music_anthem: req.body.musicAnthem || { title: '', artist: '' },
+        photos: req.body.photos || [],
         batch: batch
       })
       .eq('id', req.user.id)
